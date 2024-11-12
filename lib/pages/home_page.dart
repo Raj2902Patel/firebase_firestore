@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -25,6 +26,7 @@ class _HomePageState extends State<HomePage> {
         isLoading = false;
       });
     });
+    FirebaseCrashlytics.instance.setCustomKey("userUID", "raj2902patel");
   }
 
   final DatabaseService _databaseService = DatabaseService();
@@ -195,7 +197,8 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                       onPressed: () {
-                                        Navigator.pop(context);
+                                        // Navigator.pop(context);
+                                        FirebaseCrashlytics.instance.crash();
                                       },
                                       child: const Text(
                                         "Cancel",
@@ -252,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                   fontSize: 18.0,
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
                 if (_textEditingController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -267,6 +270,14 @@ class _HomePageState extends State<HomePage> {
                     ),
                   );
                 } else {
+                  if (_textEditingController.text.length < 3) {
+                    await FirebaseCrashlytics.instance.recordError(
+                      "error",
+                      null,
+                      reason: "Custom Error!",
+                      fatal: false,
+                    );
+                  }
                   Todo todo = Todo(
                       task: _textEditingController.text,
                       isDone: false,
